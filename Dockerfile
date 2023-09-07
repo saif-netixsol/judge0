@@ -1,4 +1,4 @@
-FROM judge0/compilers:1.4.0 AS production
+FROM ns_compilers:latest AS production
 
 ENV JUDGE0_HOMEPAGE "https://judge0.com"
 LABEL homepage=$JUDGE0_HOMEPAGE
@@ -12,48 +12,52 @@ LABEL maintainer=$JUDGE0_MAINTAINER
 ENV PATH "/usr/local/ruby-2.7.0/bin:/opt/.gem/bin:$PATH"
 ENV GEM_HOME "/opt/.gem/"
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      cron \
-      libpq-dev \
-      sudo && \
-    rm -rf /var/lib/apt/lists/* && \
-    echo "gem: --no-document" > /root/.gemrc && \
-    gem install bundler:2.1.4 && \
-    npm install -g --unsafe-perm aglio@2.3.0
+RUN cd /usr/local
+RUN ls
+RUN gem list
 
-ENV VIRTUAL_PORT 2358
-EXPOSE $VIRTUAL_PORT
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#       cron \
+#       libpq-dev \
+#       sudo && \
+#     rm -rf /var/lib/apt/lists/* && \
+#     echo "gem: --no-document" > /root/.gemrc && \
+#     gem install bundler:2.1.4 && \
+#     npm install -g --unsafe-perm aglio@2.3.0
 
-WORKDIR /api
+# ENV VIRTUAL_PORT 2358
+# EXPOSE $VIRTUAL_PORT
 
-COPY Gemfile* ./
-RUN RAILS_ENV=production bundle
+# WORKDIR /api
 
-COPY cron /etc/cron.d
-RUN cat /etc/cron.d/* | crontab -
+# COPY Gemfile* ./
+# RUN RAILS_ENV=production bundle
 
-COPY . .
+# COPY cron /etc/cron.d
+# RUN cat /etc/cron.d/* | crontab -
 
-ENTRYPOINT ["/api/docker-entrypoint.sh"]
-CMD ["/api/scripts/server"]
+# COPY . .
 
-ENV JUDGE0_VERSION "1.13.0"
-LABEL version=$JUDGE0_VERSION
+# ENTRYPOINT ["/api/docker-entrypoint.sh"]
+# CMD ["/api/scripts/server"]
+
+# ENV JUDGE0_VERSION "1.13.0"
+# LABEL version=$JUDGE0_VERSION
 
 
-FROM production AS development
+# FROM production AS development
 
-ARG DEV_USER=judge0
-ARG DEV_USER_ID=1000
+# ARG DEV_USER=judge0
+# ARG DEV_USER_ID=1000
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        tmux \
-        vim && \
-    useradd -u $DEV_USER_ID -m -r $DEV_USER && \
-    echo "$DEV_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#         tmux \
+#         vim && \
+#     useradd -u $DEV_USER_ID -m -r $DEV_USER && \
+#     echo "$DEV_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
 
-USER $DEV_USER
+# USER $DEV_USER
 
-CMD ["sleep", "infinity"]
+# CMD ["sleep", "infinity"]
